@@ -7,4 +7,4 @@ Generate invoices in node.js with the [Invoice Generator API](https://github.com
 
 First, customize invoice.js with the parameters for your invoice. Then run this to download a PDF:
 
-	ndoe invoice.js
+	node invoice.js
