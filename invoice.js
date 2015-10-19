@@ -1,6 +1,41 @@
 var https   = require("https");
 var fs      = require("fs");
 
+function generateInvoice(invoice, filename, success, error) {
+    var postData = JSON.stringify(invoice);
+    var options = {
+        hostname  : "invoice-generator.com",
+        port      : 443,
+        path      : "/",
+        method    : "POST",
+        headers   : {
+            "Content-Type": "application/json",
+            "Content-Length": postData.length
+        }
+    };
+
+    var file = fs.createWriteStream(filename);
+
+    var req = https.request(options, function(res) {
+        res.on('data', function(chunk) {
+            file.write(chunk);
+        })
+        .on('end', function() {
+            file.end();
+
+            if (typeof success === 'function') {
+                success();
+            }
+        });
+    });
+    req.write(postData);
+    req.end();
+
+    if (typeof error === 'function') {
+        req.on('error', error);
+    }
+}
+
 var invoice = {
     logo: "http://invoiced.com/img/logo-invoice.png",
     from: "Invoiced\n701 Brazos St\nAustin, TX 78748",
@@ -23,33 +58,8 @@ var invoice = {
     terms: "No need to submit payment. You will be auto-billed for this invoice."
 };
 
-var postData = JSON.stringify(invoice);
-var options = {
-    hostname  : "invoice-generator.com",
-    port      : 443,
-    path      : "/",
-    method    : "POST",
-    headers   : {
-        "Content-Type": "application/json",
-        "Content-Length": postData.length
-    }
-};
-
-var filename = "invoice.pdf";
-var file = fs.createWriteStream(filename);
-
-var req = https.request(options, function(res) {
-    res.on('data', function(chunk) {
-        file.write(chunk);
-    })
-    .on('end', function() {
-        file.end();
-        console.log("Saved invoice to "+filename);
-    });
-});
-req.write(postData);
-req.end();
-
-req.on('error', function(e) {
-    console.error(e);
+generateInvoice(invoice, 'invoice.pdf', function() {
+    console.log("Saved invoice to invoice.pdf");
+}, function(error) {
+    console.error(error);
 });
