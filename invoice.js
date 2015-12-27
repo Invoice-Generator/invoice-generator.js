@@ -10,7 +10,7 @@ function generateInvoice(invoice, filename, success, error) {
         method    : "POST",
         headers   : {
             "Content-Type": "application/json",
-            "Content-Length": postData.length
+            "Content-Length": Buffer.byteLength(postData)
         }
     };
 
